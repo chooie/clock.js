@@ -1,2 +1,6 @@
 # clock.js
-Simple Clock drawn with Canvas
+Drawing a basic analogue clock using the canvas element.
+
+## Demo
+[Check it out.](http://chooie.github.io/clock.js/)
+
