@@ -3,13 +3,22 @@
  */
 (function () {
     "use strict";
-    var drawing = document.getElementById("drawing");
-    drawing.style.border = "3px solid black";
+    var canvas = document.getElementById("drawing"),
+        context;
+    canvas.style.border = "3px solid black";
+    context = canvas.getContext("2d");
 
-    if ( ! drawing.getContext) {
-        throw new Error("Canvas: This object does not support the canvas API.");
+    // Improve the quality for retina display users
+    if (window.devicePixelRatio == 2) {
+        canvas.style.width = "200px";
+        canvas.style.height = "200px";
+        context.scale(2, 2);
+    } else {
+        canvas.style.width = "200px";
+        canvas.style.height = "200px";
     }
 
-    Clock.drawClock(drawing);
-    Clock.repeatDrawClock(drawing);
+
+    Clock.drawClock(canvas);
+    Clock.repeatDrawClock(canvas);
 })();
