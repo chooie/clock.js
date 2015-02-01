@@ -18,7 +18,6 @@
         canvas.style.height = "200px";
     }
 
-
     Clock.drawClock(canvas);
     Clock.repeatDrawClock(canvas);
 })();
