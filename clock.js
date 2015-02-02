@@ -1,169 +1,206 @@
 /**
  * Created by chooie on 31/01/2015.
  */
-var Clock = (function () {
-    "use strict";
 
-    var OUTER_CIRCLE_RADIUS = 99,
-        INNER_CIRCLE_RADIUS = 94,
-        HAND_ORIGIN_CIRCLE_RADIUS = 5,
-        NUMBERS_CIRCLE_RADIUS = 85,
-        SECOND_LINE_LENGTH = 85,
-        SECOND_LINE_WIDTH = 1,
-        MINUTE_LINE_LENGTH = 85,
-        MINUTE_LINE_WIDTH = 3,
-        HOUR_LINE_LENGTH = 50,
-        HOUR_LINE_WIDTH = 5,
-        PI = Math.PI;
-
+(function(Chooie) {
     /**
-     * Fill in the clock numbers in the given context.
-     * @param context
-     * @param fillStyle
+     *
+     * @param canvas
+     * @constructor
      */
-    function fillClockNumbers(context, fillStyle) {
-        context.save();
-        context.font = "bold 14px Arial";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        if (typeof fillStyle === "string") {
-            context.fillStyle = fillStyle;
+    Chooie.Clock = function(canvas) {
+        if ( ! canvas instanceof HTMLCanvasElement) {
+            throw new Error("Clock: parameter [0] must be an instance of " +
+            "HTMLCanvasElement");
         }
-        context.rotate((90 * PI) / 180);
-        var i,
+
+        if ( ! canvas.getContext instanceof Function) {
+            throw new Error("Clock: canvas element is not supported in the " +
+            "current environment.")
+        }
+
+        // Scope safe
+        if (this instanceof Chooie.Clock) {
+            this.context = canvas.getContext("2d");
+        } else {
+            return new Chooie.Clock(canvas);
+        }
+    };
+
+    // Declare constants on prototype
+    Chooie.Clock.prototype.OUTER_CIRCLE_RADIUS = 99;
+    Chooie.Clock.prototype.INNER_CIRCLE_RADIUS = 94;
+    Chooie.Clock.prototype.HAND_ORIGIN_CIRCLE_RADIUS = 5;
+    Chooie.Clock.prototype.NUMBERS_CIRCLE_RADIUS = 85;
+    Chooie.Clock.prototype.SECOND_LINE_LENGTH = 85;
+    Chooie.Clock.prototype.SECOND_LINE_WIDTH = 1;
+    Chooie.Clock.prototype.MINUTE_LINE_LENGTH = 85;
+    Chooie.Clock.prototype.MINUTE_LINE_WIDTH = 3;
+    Chooie.Clock.prototype.HOUR_LINE_LENGTH = 50;
+    Chooie.Clock.prototype.HOUR_LINE_WIDTH = 5;
+    Chooie.Clock.prototype.PI = Math.PI;
+
+
+    Chooie.Clock.prototype.fillClockNumbers = function(fillStyle) {
+        var ctx = this.context,
+            NCR = this.NUMBERS_CIRCLE_RADIUS,
+            PI = this.PI,
+            i,
             posX,
             posY;
-        for (i = 1; i <= 12; i++) {
-            posX = NUMBERS_CIRCLE_RADIUS * Math.sin((i / 12) * 2 * PI);
-            posY = -NUMBERS_CIRCLE_RADIUS * Math.cos((i / 12) * 2 * PI);
-            context.fillText("" + i, posX, posY);
+
+        ctx.save();
+
+        // Text styling
+        ctx.font = "bold 14px Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        // Set optional fillStyle attribute
+        if (typeof fillStyle === "string") {
+            ctx.fillStyle = fillStyle;
         }
-        context.restore();
-    }
+
+        // Rotate 90 degrees so that the clock numbers are in the correct
+        // position
+        ctx.rotate((90 * this.PI) / 180);
+
+        // Draw the numbers from 1 to 12
+        for (i = 1; i <= 12; i++) {
+            posX = NCR * Math.sin((i / 12) * 2 * PI);
+            posY = NCR * Math.cos((i / 12) * 2 * PI);
+            ctx.fillText("" + i, posX, posY);
+        }
+
+        ctx.restore();
+    };
 
     /**
      * Draw all the clock hands for the given context.
-     * @param context
      */
-    function drawTimeToCanvas(context) {
+    Chooie.Clock.prototype.drawTimeToCanvas = function() {
         var dateTime = new Date();
-        drawSecondHand(context, dateTime);
-        drawMinuteHand(context, dateTime);
-        drawHourHand(context, dateTime);
-    }
+        this.drawSecondHand(dateTime);
+        this.drawMinuteHand(dateTime);
+        this.drawHourHand(dateTime);
+    };
 
     /**
      * Draw the second hand.
-     * @param context
      * @param date
      */
-    function drawSecondHand(context, date) {
-        var secLen = SECOND_LINE_LENGTH,
-            secsDegrees = (date.getSeconds() / 60) * 2 * PI,
+    Chooie.Clock.prototype.drawSecondHand = function(date) {
+        var secLen = this.SECOND_LINE_LENGTH,
+            secsDegrees = (date.getSeconds() / 60) * 2 * this.PI,
             secsPosX = secLen * Math.cos(secsDegrees),
             secsPosY = secLen * Math.sin(secsDegrees);
 
-        drawHand(context, secsPosX, secsPosY, SECOND_LINE_WIDTH);
-    }
+        this.drawHand(secsPosX, secsPosY, this.SECOND_LINE_WIDTH);
+    };
 
     /**
      * Draw the minute hand.
-     * @param context
      * @param date
      */
-    function drawMinuteHand(context, date) {
-        var minLen = MINUTE_LINE_LENGTH,
+    Chooie.Clock.prototype.drawMinuteHand = function(date) {
+        var minLen = this.MINUTE_LINE_LENGTH,
             secsInMinute = 60 * 60,
             minsDegrees = (((date.getMinutes() * 60) + date.getSeconds()) /
-                secsInMinute) * 2 * PI,
+                secsInMinute) * 2 * this.PI,
             minsPosX = minLen * Math.cos(minsDegrees),
             minsPosY = minLen * Math.sin(minsDegrees);
 
-        drawHand(context, minsPosX, minsPosY, MINUTE_LINE_WIDTH);
-    }
+        this.drawHand(minsPosX, minsPosY, this.MINUTE_LINE_WIDTH);
+    };
 
     /**
      * Draw the hour hand.
-     * @param context
      * @param date
      */
-    function drawHourHand(context, date) {
-        var hourLen = HOUR_LINE_LENGTH,
+    Chooie.Clock.prototype.drawHourHand = function(date) {
+        var hourLen = this.HOUR_LINE_LENGTH,
             minutesInHalfADay = 12 * 60,
             hoursDegrees = ((((date.getHours() % 12) * 60) +
-                date.getMinutes()) / minutesInHalfADay) * 2 * PI,
+                date.getMinutes()) / minutesInHalfADay) * 2 * this.PI,
             hoursPosX = hourLen * Math.cos(hoursDegrees),
             hoursPosY = hourLen * Math.sin(hoursDegrees);
 
-        drawHand(context, hoursPosX, hoursPosY, HOUR_LINE_WIDTH);
-    }
+        this.drawHand(hoursPosX, hoursPosY, this.HOUR_LINE_WIDTH);
+    };
 
     /**
      * Draws a clock hand.
-     * @param context
      * @param posX
      * @param posY
      * @param lineWidth
      */
-    function drawHand(context, posX, posY, lineWidth) {
-        context.save();
-        context.beginPath();
-        context.moveTo(0, 0);
-        context.lineWidth = lineWidth;
-        context.lineTo(posX, posY);
-        context.strokeStyle = "#FFFFFF";
-        context.stroke();
-        context.restore();
+    Chooie.Clock.prototype.drawHand = function(posX, posY, lineWidth) {
+        var ctx = this.context;
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineWidth = lineWidth;
+        ctx.lineTo(posX, posY);
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.stroke();
+        ctx.restore();
 
-    }
+    };
 
     /**
      * Draw the entire clock.
-     * @param canvas
      */
-    function drawClock(canvas) {
+    Chooie.Clock.prototype.drawClock = function() {
+        var ctx = this.context;
 
-        if (! canvas instanceof HTMLCanvasElement) {
-            throw new Error("drawClock: parameter must be an instance of " +
-            "HTMLCanvasElement");
-        }
-        var context = canvas.getContext("2d");
-
-        context.save(); // save initial context
+        ctx.save(); // save initial context
 
         // Erase previous context
-        context.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, this.context.canvas.width,
+            this.context.canvas.height);
 
         // Beginning of coordinate translation
         // Translate to center.
-        context.translate(100, 100);
+        ctx.translate(100, 100);
 
         // Outer face
-        drawFace(context, 0, 0, OUTER_CIRCLE_RADIUS, 0, 2 * PI, false,
-            "#336E7B");
+        this.drawFace(0, 0, this.OUTER_CIRCLE_RADIUS, 0, 2 * this.PI,
+            false, "#336E7B");
 
         // Inner face
-        drawFace(context, 0, 0, INNER_CIRCLE_RADIUS, 0, 2 * PI, false,
-            "#22313F");
+        this.drawFace(0, 0, this.INNER_CIRCLE_RADIUS, 0, 2 * this.PI,
+            false, "#22313F");
 
         // Rotate the context 90 degrees to the left
-        context.rotate((-90 * PI) / 180);
+        ctx.rotate((-90 * this.PI) / 180);
 
 
-        fillClockNumbers(context, "#FFFFFF");
+        this.fillClockNumbers(ctx, "#FFFFFF");
 
-        drawTimeToCanvas(context);
+        this.drawTimeToCanvas(ctx);
 
         // Hand origin face (the circle where the hands come out of)
-        drawFace(context, 0, 0, HAND_ORIGIN_CIRCLE_RADIUS, 0, 2 * PI, false,
-            "#19B5FE");
+        this.drawFace(0, 0, this.HAND_ORIGIN_CIRCLE_RADIUS, 0,
+            2 * this.PI, false, "#19B5FE");
 
-        context.restore(); // restore initial context
-    }
+        ctx.restore(); // restore initial context
+    };
 
     /**
-     * Draw Clock face
-     * @param context
+     * Redraws the clock every second (1000ms).
+     */
+    Chooie.Clock.prototype.repeatDrawClock = function() {
+        // Note that 'that' is assigned the current 'this' context because
+        // 'setTimeout' always executes within the 'window' context
+        var that = this;
+        setTimeout(function() {
+            that.drawClock(this.canvas);
+            that.repeatDrawClock();
+        }, 1000);
+    };
+
+    /**
+     * Draw clock face.
      * @param posX
      * @param posY
      * @param radius
@@ -172,46 +209,31 @@ var Clock = (function () {
      * @param counterClockWise
      * @param fillColour
      */
-    function drawFace(context, posX, posY, radius, startAngle, endAngle,
-                           counterClockWise, fillColour) {
+    Chooie.Clock.prototype.drawFace = function(posX, posY, radius, startAngle,
+                                        endAngle, counterClockWise,
+                                        fillColour) {
+        var ctx = this.context;
 
-        context.save();
+        ctx.save();
 
         // Start outer circle path
-        context.beginPath();
+        ctx.beginPath();
 
         // Draw circle
-        context.arc(posX, posY, radius, startAngle, endAngle, counterClockWise);
+        ctx.arc(posX, posY, radius, startAngle, endAngle, counterClockWise);
 
         // Close outer circle path
-        context.closePath();
+        ctx.closePath();
 
         // Option fill colour
         if (typeof fillColour === "string") {
-            context.fillStyle = fillColour;
-            context.fill();
+            ctx.fillStyle = fillColour;
+            ctx.fill();
         }
 
         // Stroke the path
-        context.stroke();
+        ctx.stroke();
 
-        context.restore();
-    }
-
-    /**
-     * Redraws the clock every second (1000ms).
-     * @param canvas
-     */
-    function repeatDrawClock(canvas) {
-        setTimeout(function() {
-            drawClock(canvas);
-            repeatDrawClock(canvas);
-        }, 1000);
-    }
-
-    // Expose Object methods
-    return {
-        repeatDrawClock: repeatDrawClock,
-        drawClock: drawClock
-    }
-})();
+        ctx.restore();
+    };
+})(window.Chooie = window.Chooie || {});

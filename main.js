@@ -18,6 +18,8 @@
         canvas.style.height = "200px";
     }
 
-    Clock.drawClock(canvas);
-    Clock.repeatDrawClock(canvas);
+    var clock = new Chooie.Clock(canvas);
+    clock.drawClock();
+    clock.repeatDrawClock();
+
 })();
