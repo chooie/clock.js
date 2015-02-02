@@ -71,14 +71,13 @@
             ctx.fillStyle = fillStyle;
         }
 
-        // Rotate 90 degrees so that the clock numbers are in the correct
-        // position
-        ctx.rotate((90 * this.PI) / 180);
+        // Rotate 90 degrees so that the clock numbers are angled correctly
+        ctx.rotate((90 * PI) / 180);
 
         // Draw the numbers from 1 to 12
         for (i = 1; i <= 12; i++) {
             posX = NCR * Math.sin((i / 12) * 2 * PI);
-            posY = NCR * Math.cos((i / 12) * 2 * PI);
+            posY = -NCR * Math.cos((i / 12) * 2 * PI);
             ctx.fillText("" + i, posX, posY);
         }
 
