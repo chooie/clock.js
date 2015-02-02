@@ -3,8 +3,13 @@
  */
 
 (function(Chooie) {
+
+    // Shorthand for Chooie.Clock.prototype
+    var proto;
+
     /**
-     *
+     * The Clock constructor. Clock objects are used to draw clock graphics to
+     * a canvas element.
      * @param canvas
      * @constructor
      */
@@ -27,21 +32,26 @@
         }
     };
 
+    proto = Chooie.Clock.prototype;
+
     // Declare constants on prototype
-    Chooie.Clock.prototype.OUTER_CIRCLE_RADIUS = 99;
-    Chooie.Clock.prototype.INNER_CIRCLE_RADIUS = 94;
-    Chooie.Clock.prototype.HAND_ORIGIN_CIRCLE_RADIUS = 5;
-    Chooie.Clock.prototype.NUMBERS_CIRCLE_RADIUS = 85;
-    Chooie.Clock.prototype.SECOND_LINE_LENGTH = 85;
-    Chooie.Clock.prototype.SECOND_LINE_WIDTH = 1;
-    Chooie.Clock.prototype.MINUTE_LINE_LENGTH = 85;
-    Chooie.Clock.prototype.MINUTE_LINE_WIDTH = 3;
-    Chooie.Clock.prototype.HOUR_LINE_LENGTH = 50;
-    Chooie.Clock.prototype.HOUR_LINE_WIDTH = 5;
-    Chooie.Clock.prototype.PI = Math.PI;
+    proto.OUTER_CIRCLE_RADIUS = 99;
+    proto.INNER_CIRCLE_RADIUS = 94;
+    proto.HAND_ORIGIN_CIRCLE_RADIUS = 5;
+    proto.NUMBERS_CIRCLE_RADIUS = 85;
+    proto.SECOND_LINE_LENGTH = 85;
+    proto.SECOND_LINE_WIDTH = 1;
+    proto.MINUTE_LINE_LENGTH = 85;
+    proto.MINUTE_LINE_WIDTH = 3;
+    proto.HOUR_LINE_LENGTH = 50;
+    proto.HOUR_LINE_WIDTH = 5;
+    proto.PI = Math.PI;
 
-
-    Chooie.Clock.prototype.fillClockNumbers = function(fillStyle) {
+    /**
+     * Fill in all the clock's numbers from 1 to 12.
+     * @param fillStyle
+     */
+    proto.fillClockNumbers = function(fillStyle) {
         var ctx = this.context,
             NCR = this.NUMBERS_CIRCLE_RADIUS,
             PI = this.PI,
@@ -78,7 +88,7 @@
     /**
      * Draw all the clock hands for the given context.
      */
-    Chooie.Clock.prototype.drawTimeToCanvas = function() {
+    proto.drawTimeToCanvas = function() {
         var dateTime = new Date();
         this.drawSecondHand(dateTime);
         this.drawMinuteHand(dateTime);
@@ -89,7 +99,7 @@
      * Draw the second hand.
      * @param date
      */
-    Chooie.Clock.prototype.drawSecondHand = function(date) {
+    proto.drawSecondHand = function(date) {
         var secLen = this.SECOND_LINE_LENGTH,
             secsDegrees = (date.getSeconds() / 60) * 2 * this.PI,
             secsPosX = secLen * Math.cos(secsDegrees),
@@ -102,7 +112,7 @@
      * Draw the minute hand.
      * @param date
      */
-    Chooie.Clock.prototype.drawMinuteHand = function(date) {
+    proto.drawMinuteHand = function(date) {
         var minLen = this.MINUTE_LINE_LENGTH,
             secsInMinute = 60 * 60,
             minsDegrees = (((date.getMinutes() * 60) + date.getSeconds()) /
@@ -117,7 +127,7 @@
      * Draw the hour hand.
      * @param date
      */
-    Chooie.Clock.prototype.drawHourHand = function(date) {
+    proto.drawHourHand = function(date) {
         var hourLen = this.HOUR_LINE_LENGTH,
             minutesInHalfADay = 12 * 60,
             hoursDegrees = ((((date.getHours() % 12) * 60) +
@@ -134,7 +144,7 @@
      * @param posY
      * @param lineWidth
      */
-    Chooie.Clock.prototype.drawHand = function(posX, posY, lineWidth) {
+    proto.drawHand = function(posX, posY, lineWidth) {
         var ctx = this.context;
         ctx.save();
         ctx.beginPath();
@@ -150,7 +160,7 @@
     /**
      * Draw the entire clock.
      */
-    Chooie.Clock.prototype.drawClock = function() {
+    proto.drawClock = function() {
         var ctx = this.context;
 
         ctx.save(); // save initial context
@@ -175,7 +185,7 @@
         ctx.rotate((-90 * this.PI) / 180);
 
 
-        this.fillClockNumbers(ctx, "#FFFFFF");
+        this.fillClockNumbers("#FFFFFF");
 
         this.drawTimeToCanvas(ctx);
 
@@ -189,7 +199,7 @@
     /**
      * Redraws the clock every second (1000ms).
      */
-    Chooie.Clock.prototype.repeatDrawClock = function() {
+    proto.repeatDrawClock = function() {
         // Note that 'that' is assigned the current 'this' context because
         // 'setTimeout' always executes within the 'window' context
         var that = this;
@@ -209,9 +219,8 @@
      * @param counterClockWise
      * @param fillColour
      */
-    Chooie.Clock.prototype.drawFace = function(posX, posY, radius, startAngle,
-                                        endAngle, counterClockWise,
-                                        fillColour) {
+    proto.drawFace = function(posX, posY, radius, startAngle, endAngle,
+                              counterClockWise, fillColour) {
         var ctx = this.context;
 
         ctx.save();
