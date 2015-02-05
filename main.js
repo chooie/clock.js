@@ -24,6 +24,7 @@
   clock1.drawClock();
 
   clock2 = new Chooie.Clock(canvas, 300, 100, {
+    type: "analog-24",
     borderColour: "#212121",
     faceColour: "#455A64",
     centreDialColour: "#03A9F4",

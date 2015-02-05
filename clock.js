@@ -54,6 +54,7 @@
       // Optional properties
       this.height = options.height || 100;
       this.width = options.width || 100;
+      this.type = options.type || "analog-12";
       this.borderRadius = options.borderRadius || 99;
       this.borderColour = options.borderColour || "#616161";
       this.faceRadius = options.faceRadius || 94;
@@ -70,6 +71,10 @@
 
       if (typeof this.width !== "number") {
         throw new Error("Clock: width must be a number.")
+      }
+
+      if (typeof this.type !== "string") {
+        throw new Error("Clock: type must be a string.");
       }
 
       if (typeof this.borderRadius !== "number") {
@@ -137,8 +142,21 @@
       NCR = this.numbersRadius,
       PI = this.PI,
       i,
+      numHours,
       posX,
       posY;
+
+    switch (this.type) {
+      case "analog-12":
+        numHours = 12;
+        break;
+      case "analog-24":
+        numHours = 24;
+        break;
+      default:
+        throw new Error("fillClockNumbers: type " + this.type + "is not a " +
+        "valid type");
+    }
 
     ctx.save();
 
@@ -149,9 +167,9 @@
     ctx.fillStyle = this.numbersColour;
 
     // Draw the numbers from 1 to 12
-    for (i = 1; i <= 12; i++) {
-      posX = NCR * Math.sin((i / 12) * 2 * PI);
-      posY = -NCR * Math.cos((i / 12) * 2 * PI);
+    for (i = 1; i <= numHours; i++) {
+      posX = NCR * Math.sin((i / numHours) * 2 * PI);
+      posY = -NCR * Math.cos((i / numHours) * 2 * PI);
       ctx.fillText("" + i, posX, posY);
     }
 
@@ -210,11 +228,29 @@
    */
   proto.drawHourHand = function(date) {
     var hourLen = this.HOUR_LINE_LENGTH,
-      minutesInHalfADay = 12 * 60,
-      hoursDegrees = ((((date.getHours() % 12) * 60) +
-        date.getMinutes()) / minutesInHalfADay) * 2 * this.PI,
-      hoursPosX = hourLen * Math.cos(hoursDegrees),
-      hoursPosY = hourLen * Math.sin(hoursDegrees);
+      numMinutesInFullClockCycle,
+      numHours,
+      hoursDegrees,
+      hoursPosX,
+      hoursPosY;
+
+    switch (this.type) {
+      case "analog-12":
+        numHours = 12;
+        break;
+      case "analog-24":
+        numHours = 24;
+        break;
+      default:
+        throw new Error("fillClockNumbers: type " + this.type + "is not a " +
+        "valid type");
+    }
+    
+    numMinutesInFullClockCycle = numHours * 60;
+    hoursDegrees = ((((date.getHours() % numHours) * 60) +
+      date.getMinutes()) / numMinutesInFullClockCycle) * 2 * this.PI;
+    hoursPosX = hourLen * Math.cos(hoursDegrees);
+    hoursPosY = hourLen * Math.sin(hoursDegrees);
 
     this.drawHand(hoursPosX, hoursPosY, this.HOUR_LINE_WIDTH);
   };
