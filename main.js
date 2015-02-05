@@ -4,7 +4,11 @@
 (function() {
   "use strict";
   var canvas = document.getElementById( "drawing" ),
-    context;
+    context,
+    clock1,
+    clock2,
+    clock3,
+    clock4;
 
   canvas.style.border = "3px solid black";
   context = canvas.getContext( "2d" );
@@ -16,6 +20,15 @@
     context.scale( 2, 2 );
   }
 
-  var clock = new Chooie.Clock( canvas );
-  clock.drawClock();
+  clock1 = new Chooie.Clock( canvas, 100, 100 );
+  clock1.drawClock();
+
+  clock2 = new Chooie.Clock(canvas, 300, 100);
+  clock2.drawClock();
+
+  clock3 = new Chooie.Clock( canvas, 100, 300 );
+  clock3.drawClock();
+
+  clock4 = new Chooie.Clock(canvas, 300, 300);
+  clock4.drawClock();
 })();

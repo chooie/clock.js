@@ -12,33 +12,115 @@
    * a canvas element.
    * @param canvas
    * @constructor
+   * @param canvasPosX
+   * @param canvasPosY
+   * @param options
    */
-  Chooie.Clock = function( canvas ) {
+  Chooie.Clock = function( canvas, canvasPosX, canvasPosY, options ) {
     if ( !canvas instanceof HTMLCanvasElement ) {
       throw new Error( "Clock: parameter [0] must be an instance of " +
-      "HTMLCanvasElement" );
+      "HTMLCanvasElement." );
     }
 
     if ( !canvas.getContext instanceof Function ) {
       throw new Error( "Clock: canvas element is not supported in the " +
-      "current environment." )
+      "current environment." );
+    }
+
+    if ( typeof canvasPosX !== "number" ) {
+      throw new Error( "Clock: parameter [1] must be a number." )
+    }
+
+    if ( typeof canvasPosY !== "number" ) {
+      throw new Error( "Clock: parameter [2] must be a number." )
+    }
+
+    if ( typeof options !== "undefined" && options !== "object" ) {
+      throw new Error( "Clock: optional parameter [1] must be an object." );
     }
 
     // Scope safe
     if ( this instanceof Chooie.Clock ) {
       this.context = canvas.getContext( "2d" );
+      this.canvasPosX = canvasPosX;
+      this.canvasPosY = canvasPosY;
+
+      // temporary options object if one is not given. Makes optional
+      // property assignment a bit cleaner.
+      if ( !options ) {
+        options = {};
+      }
+
+      // Optional properties
+      this.height = options.height || 100;
+      this.width = options.width || 100;
+      this.borderRadius = options.borderRadius || 99;
+      this.borderColour = options.borderColour || "#616161";
+      this.faceRadius = options.faceRadius || 94;
+      this.faceColour = options.faceColour || "#F5F5F5";
+      this.centreDialRadius = options.centreDialRadius || 5;
+      this.centreDialColour = options.centreDialColour || "#607D8B";
+      this.handsColour = options.handsColour || "#212121";
+      this.numbersRadius = options.numbersRadius || 85;
+      this.numbersColour = options.numbersColour || "#212121";
+
+      if ( typeof this.height !== "number" ) {
+        throw new Error( "Clock: height must be a number." )
+      }
+
+      if ( typeof this.width !== "number" ) {
+        throw new Error( "Clock: width must be a number." )
+      }
+
+      if ( typeof this.borderRadius !== "number" ) {
+        throw new Error( "Clock: borderRadius must be a number." )
+      }
+
+      if ( typeof this.borderColour !== "string" ) {
+        throw new Error( "Clock: borderColour must be a string." );
+      }
+
+      if ( typeof this.faceRadius !== "number" ) {
+        throw new Error( "Clock: faceRadius must be a number." )
+      }
+
+      if ( typeof this.faceColour !== "string" ) {
+        throw new Error( "Clock: faceColour must be a string." );
+      }
+
+      if ( typeof this.centreDialRadius !== "number" ) {
+        throw new Error( "Clock: centreDialRadius must be a number." )
+      }
+
+      if ( typeof this.centreDialColour !== "string" ) {
+        throw new Error( "Clock: centreDialColour must be a string." );
+      }
+
+      if ( typeof this.handsColour !== "string" ) {
+        throw new Error( "Clock: centreDialColour must be a string." );
+      }
+
+      if ( typeof this.numbersRadius !== "number" ) {
+        throw new Error( "Clock: numbersRadius must be a number." )
+      }
+
+      if ( typeof this.numbersColour !== "string" ) {
+        throw new Error( "Clock: numbersColour must be a string." );
+      }
+
+      if ( !( this.centreDialRadius < this.faceRadius &&
+        this.faceRadius < this.borderRadius ) ) {
+        throw new Error( "Clock: inner faces must not have a greater radius" +
+        "than their containing faces radii." );
+      }
     } else {
-      return new Chooie.Clock( canvas );
+      return new Chooie.Clock( canvas, options );
     }
   };
 
   proto = Chooie.Clock.prototype;
 
   // Declare constants on prototype
-  proto.OUTER_CIRCLE_RADIUS = 99;
-  proto.INNER_CIRCLE_RADIUS = 94;
-  proto.HAND_ORIGIN_CIRCLE_RADIUS = 5;
-  proto.NUMBERS_CIRCLE_RADIUS = 85;
   proto.SECOND_LINE_LENGTH = 85;
   proto.SECOND_LINE_WIDTH = 1;
   proto.MINUTE_LINE_LENGTH = 85;
@@ -49,15 +131,14 @@
 
   /**
    * Fill in all the clock's numbers from 1 to 12.
-   * @param fillStyle
    */
-  proto.fillClockNumbers = function( fillStyle ) {
+  proto.fillClockNumbers = function() {
     var ctx = this.context,
-      NCR = this.NUMBERS_CIRCLE_RADIUS,
-      PI = this.PI,
-      i,
-      posX,
-      posY;
+        NCR = this.numbersRadius,
+        PI = this.PI,
+        i,
+        posX,
+        posY;
 
     ctx.save();
 
@@ -65,14 +146,7 @@
     ctx.font = "bold 14px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-
-    // Set optional fillStyle attribute
-    if ( typeof fillStyle === "string" ) {
-      ctx.fillStyle = fillStyle;
-    }
-
-    // Rotate 90 degrees so that the clock numbers are angled correctly
-    ctx.rotate( (90 * PI) / 180 );
+    ctx.fillStyle = this.numbersColour;
 
     // Draw the numbers from 1 to 12
     for ( i = 1; i <= 12; i++ ) {
@@ -89,9 +163,17 @@
    */
   proto.drawTimeToCanvas = function() {
     var dateTime = new Date();
+
+    this.context.save();
+
+    // Rotate the context 90 degrees to the left
+    this.context.rotate( (-90 * this.PI) / 180 );
+
     this.drawSecondHand( dateTime );
     this.drawMinuteHand( dateTime );
     this.drawHourHand( dateTime );
+
+    this.context.restore();
   };
 
   /**
@@ -100,9 +182,9 @@
    */
   proto.drawSecondHand = function( date ) {
     var secLen = this.SECOND_LINE_LENGTH,
-      secsDegrees = (date.getSeconds() / 60) * 2 * this.PI,
-      secsPosX = secLen * Math.cos( secsDegrees ),
-      secsPosY = secLen * Math.sin( secsDegrees );
+        secsDegrees = (date.getSeconds() / 60) * 2 * this.PI,
+        secsPosX = secLen * Math.cos( secsDegrees ),
+        secsPosY = secLen * Math.sin( secsDegrees );
 
     this.drawHand( secsPosX, secsPosY, this.SECOND_LINE_WIDTH );
   };
@@ -113,11 +195,11 @@
    */
   proto.drawMinuteHand = function( date ) {
     var minLen = this.MINUTE_LINE_LENGTH,
-      secsInMinute = 60 * 60,
-      minsDegrees = (((date.getMinutes() * 60) + date.getSeconds()) /
-        secsInMinute) * 2 * this.PI,
-      minsPosX = minLen * Math.cos( minsDegrees ),
-      minsPosY = minLen * Math.sin( minsDegrees );
+        secsInMinute = 60 * 60,
+        minsDegrees = (((date.getMinutes() * 60) + date.getSeconds()) /
+          secsInMinute) * 2 * this.PI,
+        minsPosX = minLen * Math.cos( minsDegrees ),
+        minsPosY = minLen * Math.sin( minsDegrees );
 
     this.drawHand( minsPosX, minsPosY, this.MINUTE_LINE_WIDTH );
   };
@@ -128,11 +210,11 @@
    */
   proto.drawHourHand = function( date ) {
     var hourLen = this.HOUR_LINE_LENGTH,
-      minutesInHalfADay = 12 * 60,
-      hoursDegrees = ((((date.getHours() % 12) * 60) +
-        date.getMinutes()) / minutesInHalfADay) * 2 * this.PI,
-      hoursPosX = hourLen * Math.cos( hoursDegrees ),
-      hoursPosY = hourLen * Math.sin( hoursDegrees );
+        minutesInHalfADay = 12 * 60,
+        hoursDegrees = ((((date.getHours() % 12) * 60) +
+          date.getMinutes()) / minutesInHalfADay) * 2 * this.PI,
+        hoursPosX = hourLen * Math.cos( hoursDegrees ),
+        hoursPosY = hourLen * Math.sin( hoursDegrees );
 
     this.drawHand( hoursPosX, hoursPosY, this.HOUR_LINE_WIDTH );
   };
@@ -152,7 +234,7 @@
     ctx.moveTo( 0, 0 );
     ctx.lineWidth = lineWidth;
     ctx.lineTo( posX, posY );
-    ctx.strokeStyle = "#FFFFFF";
+    ctx.strokeStyle = this.handsColour;
     ctx.closePath();
     ctx.stroke();
 
@@ -174,32 +256,26 @@
 
     ctx.save();
 
-    // Erase previous context
-    ctx.clearRect( 0, 0, this.context.canvas.width,
-      this.context.canvas.height );
-
     // Beginning of coordinate translation
     // Translate to center.
-    ctx.translate( 100, 100 );
+    ctx.translate( this.canvasPosX, this.canvasPosY );
+
+    // Erase previous context
+    ctx.clearRect( 0, 0, this.width,
+      this.height );
 
     // Outer face
-    this.drawFace( 0, 0, this.OUTER_CIRCLE_RADIUS, 0, 2 * this.PI,
-      false, "#336E7B" );
+    this.drawFace( this.borderRadius, this.borderColour );
 
     // Inner face
-    this.drawFace( 0, 0, this.INNER_CIRCLE_RADIUS, 0, 2 * this.PI,
-      false, "#22313F" );
+    this.drawFace( this.faceRadius, this.faceColour );
 
-    // Rotate the context 90 degrees to the left
-    ctx.rotate( (-90 * this.PI) / 180 );
-
-    this.fillClockNumbers( "#FFFFFF" );
+    this.fillClockNumbers();
 
     this.drawTimeToCanvas( ctx );
 
-    // Hand origin face (the circle where the hands come out of)
-    this.drawFace( 0, 0, this.HAND_ORIGIN_CIRCLE_RADIUS, 0,
-      2 * this.PI, false, "#19B5FE" );
+    // Centre dial face (the circle where the hands come out of)
+    this.drawFace( this.centreDialRadius, this.centreDialColour );
 
     ctx.restore();
   };
@@ -219,17 +295,19 @@
 
   /**
    * Draw clock face.
-   * @param posX
-   * @param posY
    * @param radius
-   * @param startAngle
-   * @param endAngle
-   * @param counterClockWise
    * @param fillColour
    */
-  proto.drawFace = function( posX, posY, radius, startAngle, endAngle,
-                             counterClockWise, fillColour ) {
+  proto.drawFace = function( radius, fillColour ) {
     var ctx = this.context;
+
+    if ( typeof radius !== "number" ) {
+      throw new Error( "Clock.drawFace(): parameter [0] must be a number.");
+    }
+
+    if ( typeof fillColour !== "string" ) {
+      throw new Error( "Clock.drawFace(): parameter [1] must be a string.");
+    }
 
     ctx.save();
 
@@ -237,16 +315,13 @@
     ctx.beginPath();
 
     // Draw circle
-    ctx.arc( posX, posY, radius, startAngle, endAngle, counterClockWise );
+    ctx.arc( 0, 0, radius, 0, 2 * this.PI, false );
 
     // Close outer circle path
     ctx.closePath();
 
-    // Optional fill colour
-    if ( typeof fillColour === "string" ) {
-      ctx.fillStyle = fillColour;
-      ctx.fill();
-    }
+    ctx.fillStyle = fillColour;
+    ctx.fill();
 
     // Stroke the path
     ctx.stroke();
