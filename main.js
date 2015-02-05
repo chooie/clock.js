@@ -12,8 +12,8 @@
 
   canvas.style.border = "3px solid black";
   context = canvas.getContext("2d");
-  canvas.style.width = "200px";
-  canvas.style.height = "200px";
+  canvas.style.width = "400px";
+  canvas.style.height = "400px";
 
   // Improve the quality for retina display users
   if (window.devicePixelRatio == 2) {
