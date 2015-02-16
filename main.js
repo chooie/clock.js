@@ -10,7 +10,6 @@
     clock3,
     clock4;
 
-  canvas.style.border = "3px solid black";
   context = canvas.getContext("2d");
   canvas.style.width = "400px";
   canvas.style.height = "400px";

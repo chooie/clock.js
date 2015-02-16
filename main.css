@@ -1,0 +1,116 @@
+/* Apply a natural box layout model to all elements, but allowing
+components to change */
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  font-family: Roboto, serif;
+  font-size: 2em;
+  color: #424242;
+}
+
+/*
+ * Canvas
+ */
+.canvas-container {
+  padding: 24px;
+}
+
+#drawing {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/*
+ * Header
+ */
+.header {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+  border-bottom: 1px solid #E0E0E0;
+  min-height: 56px;
+  transition: min-height 0.3s;
+}
+
+.header-inner {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
+}
+
+.header-title {
+  font-weight: 300;
+  font-size: 2em;
+  vertical-align: bottom;
+  margin: 0.5em 0.25em 0.5em 0;
+  display: inline-block;
+  color: #212121;
+}
+
+/*
+ * Navigation
+ */
+
+.nav {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.nav-list {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-item {
+  display: inline-block;
+  width: 49%;
+  text-align: center;
+  line-height: 24px;
+  padding: 1em;
+  text-transform: uppercase;
+}
+
+.nav a {
+  font-size: 0.5em;
+  text-decoration: none;
+  color: #616161;
+}
+
+.nav a:hover {
+  text-decoration: underline;
+  color: #212121;
+}
+
+/*
+ * Main
+ */
+
+main {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.26);
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media screen and (min-width: 600px) {
+  main, .nav {
+    width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
